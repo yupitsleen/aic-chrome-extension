@@ -1,67 +1,8 @@
 /* Abdur Khan 
-Last updated 11/19/18
+Last updated 12/6/18
 This is the JavaScript document for the AIC New Tab Chrome Extension */
 
-/*
-Print salutation based on time (e.g. good morning if AM, good afternoon if early PM, good evening if later, decide when to divide good evening/good night)
-Get local date and print in format [Day (name), Month day(date)] (e.g. Thursday, November 1st)
-Print local time
-*/
-// Print greeting based on time
 
-// Array to test random function
-var imgArray = ["bay_marseille.jpeg", 
-    "bedroom.png", 
-    "jatte.png", 
-    "lozenge.png", 
-    "shiva.png", 
-    "water-lilies.png", 
-    "wave.png"
-    ];
-
-// Array to test tombstone association function
-var titleArray = [
-    "The Bay of Marseille, Seen from L'Estaque, 1885",
-    "The Bedroom, 1889",
-    "A Sunday on La Grande Jatte -- 1884, 1884/86",
-    "Lozenge Composition with Yellow, Black, Blue, Red, and Gray, 1921",
-    "Shiva as Lord of the Dance (Nataraja), 10th/11th Century",
-    "Water Lilies, 1906",
-    'Under the Wave off Kanagawa (Kanagawa oki nami ura), also known as the Great Wave, from the series "Thirty-six Views of Mount Fuji (Fugaku sanjurokkei)"'
-    ]
-
-// Array to test artist association function
-var artistArray = [
-    "Paul Cézanne",
-    "Vincent van Gogh",
-    "Georges Seurat",
-    "Piet Mondrian",
-    "India, Tamil Nadu",
-    "Claude Monet",
-    "Katsushika Hokusai"
-]
-
-// Declare random number
-var imgIndex = Math.floor(Math.random() * imgArray.length);
-
-function randomImage(imgBank, path) {
-    path = path || "assets/";
-    var imgChoice = imgArray[imgIndex];
-    var imgPath = '<img src="' + path + imgChoice + '" alt - "">';
-    document.write(imgPath); document.close();
-}
-
-// Print title in tombstone
-function tombstone() {
-    var tombstone = titleArray[imgIndex];
-    document.write(tombstone); document.close();
-}
-
-// Print artist in tombstone
-function artist() {
-  var artist = artistArray[imgIndex];
-  document.write(artist); document.close();
-}
 
 function getArtworkData() {
     var xmlhttp = new XMLHttpRequest();
@@ -72,6 +13,18 @@ function getArtworkData() {
     if (this.readyState == 4 && this.status == 200) {
         var myObj = JSON.parse(this.responseText);
         console.log('myObj', myObj);
+        console.log(myObj.data[0].artist_display);
+        var artistPrint = myObj.data[0].artist_display;
+        document.getElementById("artist").innerHTML = artistPrint;
+        var titlePrint = myObj.data[0].title;
+        document.getElementById("tombstone").innerHTML = titlePrint;
+        var imageID = myObj.data[0].image_id;
+        var imageLink = '<img src = ' + '"https://www.artic.edu/iiif/2/' + imageID + '/full/600,/0/default.jpg">'
+        document.getElementById("artwork").innerHTML = imageLink;
+        //use ID to generate artwork link on artic page
+        //get browser dimensions to get appropriate width and height?
+        //var downloadLink = '<a href = ' + '"https://www.artic.edu/iiif/2/' + imageID + '/full/600,/0/default.jpg" download>'
+        //document.getElementById("download").innerHTML = downloadLink;
         }
     };
 
@@ -105,7 +58,22 @@ function getArtworkData() {
                             "exists": {
                                 "field": "image_id"
                             }
+                        },
+                        {
+                            "term" : {
+                                "thumbnail.width": 3000
+                                
+                            }
+                        },
+                        {
+                            "range": {
+                                "thumbnail.height": {
+                                    "gte": 1575,
+                                    "lte": 2175
+                                }
+                            }
                         }
+
                     ]
                 }
             },
@@ -121,8 +89,9 @@ function getArtworkData() {
     //dataHubURL = dataHubURL + artworkRequest;*/
     xmlhttp.send(artworkRequest2);
 
-}
 
+
+}
 
 /* Query AIC API for image
  * Artworks endpoint: URL to hit to get data about artworks
